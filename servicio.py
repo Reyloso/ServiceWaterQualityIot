@@ -7,7 +7,7 @@ import socket
 import datetime
 import pytz
 from pubnub_config import pubnubClient
-from api_config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL)
+from config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL, COM_PORT)
 from request import post_data
 
 # pubnubconfig variables
@@ -55,7 +55,7 @@ def IsInternetUp():
 
 def conectSerialWithPort():
     try:
-        ser = serial.Serial('COM3', 9600, timeout=20)
+        ser = serial.Serial(COM_PORT, 9600, timeout=20)
         return ser
     except:
         print("no se pudo lograr conexion serial")
