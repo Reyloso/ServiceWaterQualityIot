@@ -26,8 +26,7 @@ class pubnubClient():
             self.status = True
             return self.pubnub
         except Error:
-            print(f'pubnub connection error occurred: {Error}')
-
+            print('pubnub connection error occurred: %s' %Error)
 
     def pubnub_publish(self, data):
         """ function to open connection to pubnub """ 

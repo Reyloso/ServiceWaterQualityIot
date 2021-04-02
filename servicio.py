@@ -69,7 +69,7 @@ while 1:
             # print("guardar en la nube")
             try:
                 if token is None:
-                    login()
+                    # login()
                 data = ser.readline()
                 datadecode = json.loads(data)
                 datadecode['date_time'] = str(getTime())
