@@ -37,7 +37,7 @@ def login():
 
 def sendDataToApi(data):
     response = post_data(API_SEND_DATA_URL, body=json.dumps(data), headers= {"Authorization": "Bearer %s" %token,"Content-Type": "application/json"})
-    print(response)
+    # print(response)
         
         
 def getTime():
@@ -79,9 +79,10 @@ while 1:
                 #se lee el puerto serial
                 data = ser.readline()
                 # print("antes de json ", data.decode("utf-8"))
+                data_nojson = data.decode("utf-8")
                 datadecode = json.loads(data.decode("utf-8"))
                 # datadecode = json.dumps(datadecode)
-                print("data decodificada", datadecode)
+                # print("data decodificada", datadecode)
                 datadecode['date_time'] = str(getTime())
                 
                 # se verifica si esta autenticado
@@ -102,7 +103,13 @@ while 1:
                 datadecode['send_cloud'] = True
                 
                 if ifclient:
-                    #ifclient.write_points(dict(datadecode))
+                    print("entro")
+                    json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
+                    
+                        
+                    # print("dict", type(data_nojson))
+                    # json_body = [(data_nojson),]
+                    ifclient.write_points(json_body)
                     print("insertado en influx")
                 # print(ser.readline().decode('utf-8'))
             except Exception as e:
