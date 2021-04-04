@@ -98,7 +98,7 @@ while 1:
                 # print(data_format)
                 if subscribe_key is not None:
                     print("mandar a pubnub")
-                    #pubnub.pubnub_publish(datadecode)
+                    pubnub.pubnub_publish(datadecode)
                     
                 datadecode['send_cloud'] = True
                 
