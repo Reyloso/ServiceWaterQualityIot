@@ -3,10 +3,10 @@
 import serial
 import time
 import json
+import ast
 import socket
 import datetime
 import pytz
-from double_quotes_json_parse import double_quotes_parse
 from pubnub_config import pubnubClient
 from config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL, COM_PORT, API_SEND_DATA_URL)
 from request import post_data
@@ -36,10 +36,7 @@ def login():
     print("dispositivo auntenticado")
 
 def sendDataToApi(data):
-    print("antes de aja", data)
-    data = double_quotes_parse(data)
-    print("data parse" , data)
-    response = post_data(API_SEND_DATA_URL, body=data, headers= {"Authorization": "Bearer %s" %token,"Content-Type": "application/json"})
+    response = post_data(API_SEND_DATA_URL, body=json.dumps(data), headers= {"Authorization": "Bearer %s" %token,"Content-Type": "application/json"})
     print(response)
         
         
@@ -81,8 +78,10 @@ while 1:
             try:
                 #se lee el puerto serial
                 data = ser.readline()
-                #print("antes de ",data)
-                datadecode = json.loads(data)
+                # print("antes de json ", data.decode("utf-8"))
+                datadecode = json.loads(data.decode("utf-8"))
+                # datadecode = json.dumps(datadecode)
+                print("data decodificada", datadecode)
                 datadecode['date_time'] = str(getTime())
                 
                 # se verifica si esta autenticado
@@ -103,8 +102,6 @@ while 1:
                 datadecode['send_cloud'] = True
                 
                 if ifclient:
-                    
-                        
                     #ifclient.write_points(dict(datadecode))
                     print("insertado en influx")
                 # print(ser.readline().decode('utf-8'))
@@ -129,4 +126,3 @@ while 1:
             except Exception as e:
                 print(e)
                 time.sleep(1)
-#  
