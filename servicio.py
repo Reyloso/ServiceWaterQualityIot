@@ -6,9 +6,11 @@ import json
 import socket
 import datetime
 import pytz
+from double_quotes_json_parse import double_quotes_parse
 from pubnub_config import pubnubClient
-from config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL, COM_PORT)
+from config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL, COM_PORT, API_SEND_DATA_URL)
 from request import post_data
+from influx_config import ifclient
 
 # pubnubconfig variables
 subscribe_key = None
@@ -31,12 +33,21 @@ def login():
     uuid = data['infodevice']['uuid_key_pubnub']
     CHANNEL = data['infodevice']['channel_pubnub']
     pubnub.pubnub_connection(subscribe_key, publish_key, uuid, CHANNEL)
+    print("dispositivo auntenticado")
 
-
+def sendDataToApi(data):
+    print("antes de aja", data)
+    data = double_quotes_parse(data)
+    print("data parse" , data)
+    response = post_data(API_SEND_DATA_URL, body=data, headers= {"Authorization": "Bearer %s" %token,"Content-Type": "application/json"})
+    print(response)
+        
+        
 def getTime():
     date_time = datetime.datetime.now(pytz.timezone('America/Bogota'))
     date_time = date_time.strftime("%m/%d/%Y, %H:%M:%S")
     return date_time
+
 
 def IsInternetUp():
     testConn = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -68,17 +79,34 @@ while 1:
         if IsInternetUp():
             # print("guardar en la nube")
             try:
-                if token is None:
-                    # login()
+                #se lee el puerto serial
                 data = ser.readline()
+                #print("antes de ",data)
                 datadecode = json.loads(data)
                 datadecode['date_time'] = str(getTime())
-                print(datadecode)
+                
+                # se verifica si esta autenticado
+                if token is None:
+                    print("auntenticando dispositivo")
+                    login()
+                else:
+                    print("enviando data via api-rest")
+                    sendDataToApi(datadecode)
+                
+                #print(datadecode)
                
                 # print(data_format)
+                if subscribe_key is not None:
+                    print("mandar a pubnub")
+                    #pubnub.pubnub_publish(datadecode)
+                    
+                datadecode['send_cloud'] = True
                 
-                print("mandar a pubnub")
-                pubnub.pubnub_publish(datadecode)
+                if ifclient:
+                    
+                        
+                    #ifclient.write_points(dict(datadecode))
+                    print("insertado en influx")
                 # print(ser.readline().decode('utf-8'))
             except Exception as e:
                 print(e)
@@ -89,7 +117,14 @@ while 1:
                 # print(data)
                 datadecode = json.loads(data)
                 datadecode['date_time'] = str(getTime())
+                datadecode['send_cloud'] = False
                 print("guardar en influx db")
+                if ifclient:
+                    data = [{
+                        "measurement":"measurement",
+                        "data":datadecode}]
+                    ifclient.write_points(data)
+                    print("insertado en influx")
                 # print(ser.readline().decode('utf-8'))
             except Exception as e:
                 print(e)

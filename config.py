@@ -1,8 +1,9 @@
-API_URL = 'http://127.0.0.1:8000/'
+API_URL = 'https://app.waterqualityiot.co/'
 API_SELF_DEVICE_USERNAME = 'device1'
-API_SELF_DEVICE_PASSWORD = 'Welcome@2021'
+API_SELF_DEVICE_PASSWORD = 'welcome@2021'
 
 API_LOGIN_URL = API_URL + 'auth/token/device'
+API_SEND_DATA_URL = API_URL + 'api/measurements/data/create'
 
-COM_PORT = 'tty0'
+COM_PORT = '/dev/ttyACM0'
 # COM_PORT = 'COM'
