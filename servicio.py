@@ -73,7 +73,7 @@ ser = conectSerialWithPort()
 
 while 1:
     if ser:
-        if ser.read()
+        if ser.read():
             if IsInternetUp():
                 # print("guardar en la nube")
                 try:
