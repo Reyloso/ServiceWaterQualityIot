@@ -72,64 +72,65 @@ def conectSerialWithPort():
 ser = conectSerialWithPort()
 
 while 1:
-    if ser.read():
-        if IsInternetUp():
-            # print("guardar en la nube")
-            try:
-                #se lee el puerto serial
-                data = ser.readline()
-                # print("antes de json ", data.decode("utf-8"))
-                data_nojson = data.decode("utf-8")
-                datadecode = json.loads(data.decode("utf-8"))
-                # datadecode = json.dumps(datadecode)
-                # print("data decodificada", datadecode)
-                datadecode['date_time'] = str(getTime())
-                
-                # se verifica si esta autenticado
-                if token is None:
-                    print("auntenticando dispositivo")
-                    login()
-                else:
-                    print("enviando data via api-rest")
-                    sendDataToApi(datadecode)
-                
-                #print(datadecode)
-               
-                # print(data_format)
-                if subscribe_key is not None:
-                    print("mandar a pubnub")
-                    pubnub.pubnub_publish(datadecode)
+    if ser:
+        if ser.read()
+            if IsInternetUp():
+                # print("guardar en la nube")
+                try:
+                    #se lee el puerto serial
+                    data = ser.readline()
+                    # print("antes de json ", data.decode("utf-8"))
+                    data_nojson = data.decode("utf-8")
+                    datadecode = json.loads(data.decode("utf-8"))
+                    # datadecode = json.dumps(datadecode)
+                    # print("data decodificada", datadecode)
+                    datadecode['date_time'] = str(getTime())
                     
-                datadecode['send_cloud'] = True
-                
-                if ifclient:
-                    print("entro")
-                    json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
+                    # se verifica si esta autenticado
+                    if token is None:
+                        print("auntenticando dispositivo")
+                        login()
+                    else:
+                        print("enviando data via api-rest")
+                        sendDataToApi(datadecode)
                     
+                    #print(datadecode)
+                
+                    # print(data_format)
+                    if subscribe_key is not None:
+                        print("mandar a pubnub")
+                        pubnub.pubnub_publish(datadecode)
                         
-                    # print("dict", type(data_nojson))
-                    # json_body = [(data_nojson),]
-                    ifclient.write_points(json_body)
-                    print("insertado en influx")
-                # print(ser.readline().decode('utf-8'))
-            except Exception as e:
-                print(e)
-                time.sleep(1)
-        else:
-            try:
-                data = ser.readline()
-                # print(data)
-                datadecode = json.loads(data)
-                datadecode['date_time'] = str(getTime())
-                datadecode['send_cloud'] = False
-                print("guardar en influx db")
-                if ifclient:
-                    data = [{
-                        "measurement":"measurement",
-                        "data":datadecode}]
-                    ifclient.write_points(data)
-                    print("insertado en influx")
-                # print(ser.readline().decode('utf-8'))
-            except Exception as e:
-                print(e)
-                time.sleep(1)
+                    datadecode['send_cloud'] = True
+                    
+                    if ifclient:
+                        print("entro")
+                        json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
+                        
+                            
+                        # print("dict", type(data_nojson))
+                        # json_body = [(data_nojson),]
+                        ifclient.write_points(json_body)
+                        print("insertado en influx")
+                    # print(ser.readline().decode('utf-8'))
+                except Exception as e:
+                    print(e)
+                    time.sleep(1)
+            else:
+                try:
+                    data = ser.readline()
+                    # print(data)
+                    datadecode = json.loads(data)
+                    datadecode['date_time'] = str(getTime())
+                    datadecode['send_cloud'] = False
+                    print("guardar en influx db")
+                    if ifclient:
+                        data = [{
+                            "measurement":"measurement",
+                            "data":datadecode}]
+                        ifclient.write_points(data)
+                        print("insertado en influx")
+                    # print(ser.readline().decode('utf-8'))
+                except Exception as e:
+                    print(e)
+                    time.sleep(1)
