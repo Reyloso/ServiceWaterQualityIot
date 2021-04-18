@@ -103,15 +103,15 @@ while 1:
                         
                     datadecode['send_cloud'] = True
                     
-                    if ifclient:
-                        print("entro")
-                        json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
+                    # if ifclient:
+                        # print("entro")
+                        # json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
                         
                             
                         # print("dict", type(data_nojson))
                         # json_body = [(data_nojson),]
-                        ifclient.write_points(json_body)
-                        print("insertado en influx")
+                        # ifclient.write_points(json_body)
+                        # print("insertado en influx")
                     # print(ser.readline().decode('utf-8'))
                 except Exception as e:
                     print(e)
@@ -124,12 +124,12 @@ while 1:
                     datadecode['date_time'] = str(getTime())
                     datadecode['send_cloud'] = False
                     print("guardar en influx db")
-                    if ifclient:
-                        data = [{
-                            "measurement":"measurement",
-                            "data":datadecode}]
-                        ifclient.write_points(data)
-                        print("insertado en influx")
+                    # if ifclient:
+                    #     data = [{
+                    #         "measurement":"measurement",
+                    #         "data":datadecode}]
+                    #     ifclient.write_points(data)
+                    #     print("insertado en influx")
                     # print(ser.readline().decode('utf-8'))
                 except Exception as e:
                     print(e)
