@@ -61,7 +61,6 @@ def IsInternetUp():
         testConn.close()
         return False
 
-# redis = connectRedisLocalDatabase()
 
 def conectSerialWithPort():
     try:
@@ -72,11 +71,12 @@ def conectSerialWithPort():
         return None
 
 ser = conectSerialWithPort()
-
+flat = True
 while 1:
     if ser:
         if ser.read():
-            if IsInternetUp():
+           #if IsInternetUp():
+            if flat:
                 try:
                     #se lee el puerto serial
                     data = ser.readline()
@@ -106,21 +106,33 @@ while 1:
                         print("Conectado a mongo")
                         collection = db.medicion
                         print("consultando si hay datos pendientes para enviar a la nube")
-                        querySendCloud = { "send_cloud": True }
-
-                    	data_send = collection.find(querySendCloud)
-                        print(data_send)
-
-                    	listamedicion = [(datadecode)]
-                    	for lista in listamedicion:
-                    	    collection.insert_one(lista)
-                    	print("insertando data en mongodb")
+                        querySendCloud = { "send_cloud": False }
+                        queryConfirmSendCloud ={ "$set": {"send_cloud":True }}
+                        data_send = collection.count_documents(querySendCloud, limit = 1)
+                        #print(data_send)
+                        data_cloud = []
+                        if data_send > 0:
+                        	print("si encontró elementos pendientes por enviar")
+                        	data_send = collection.find(querySendCloud)
+                        	for key in data_send:
+                        		data_cloud.append(key)
+                        	print(data_cloud)
+                        	
+                        	#collection.update_many(querySendCloud,queryConfirmSendCloud)
+                        else:
+                        	print("no hay elementos pendientes por enviar")
+                        
+                        listamedicion = [(datadecode)]
+                        for lista in listamedicion:
+                        	collection.insert_one(lista)
+                        print("insertando data en mongodb") 
                 except Exception as e:
                     print(e)
                     time.sleep(1)
             else:
                 try:
                     if con:
+                    	print("no hay internet insertando en mongo")
                     	data = ser.readline()
                     	data_nojson = data.decode("utf-8")
                     	datadecode = json.loads(data.decode("utf-8"))
