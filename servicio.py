@@ -91,16 +91,18 @@ while 1:
                     if token is None:
                         print("auntenticando dispositivo")
                         login()
+                        datadecode['send_cloud'] = False
                     else:
                         print("enviando data via api-rest")
                         sendDataToApi(datadecode)
+                        datadecode['send_cloud'] = True
                                     
                     if subscribe_key is not None:
                         print("mandar a pubnub")
                         pubnub.pubnub_publish(datadecode)
 
                         
-                    datadecode['send_cloud'] = True
+                    
                     
                     if con:
                         print("Conectado a mongo")
@@ -116,9 +118,16 @@ while 1:
                         	data_send = collection.find(querySendCloud)
                         	for key in data_send:
                         		data_cloud.append(key)
+                            
+                            if token:
+                                sendDataToApi({"data":data_cloud}})
+                                collection.update_many(querySendCloud,queryConfirmSendCloud)
+                                print("data pendiente enviada a la nube, resgitros locales actualizados")
+                            else:
+                                datadecode['send_cloud'] = False
+                                print("no se ha podido enviar a la nube no hay autenticacion")
                         	print(data_cloud)
                         	
-                        	#collection.update_many(querySendCloud,queryConfirmSendCloud)
                         else:
                         	print("no hay elementos pendientes por enviar")
                         
