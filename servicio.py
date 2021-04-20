@@ -104,7 +104,7 @@ while 1:
                     
                     if con:
                         print("Conectado a mongo")
-                    	collection = db.medicion
+                        collection = db.medicion
                         print("consultando si hay datos pendientes para enviar a la nube")
                         querySendCloud = { "send_cloud": True }
 
