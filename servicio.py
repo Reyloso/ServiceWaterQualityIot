@@ -24,6 +24,8 @@ token = None
 
 pubnub = pubnubClient()
 
+db = con.waterqualityiot
+
 
 def login():
     global token, subscribe_key, publish_key, uuid, CHANNEL
@@ -76,7 +78,6 @@ while 1:
     if ser:
         if ser.read():
             if IsInternetUp():
-                # print("guardar en la nube")
                 try:
                     #se lee el puerto serial
                     data = ser.readline()
@@ -94,26 +95,20 @@ while 1:
                     else:
                         print("enviando data via api-rest")
                         sendDataToApi(datadecode)
-                    
-                    #print(datadecode)
-                
-                    # print(data_format)
+                                    
                     if subscribe_key is not None:
                         print("mandar a pubnub")
                         pubnub.pubnub_publish(datadecode)
                         
                     datadecode['send_cloud'] = True
                     
-                    # if ifclient:
-                        # print("entro")
-                        # json_body = [{'measurement':'measurement','tags':{'device':'device1'},'fields':{'value':'0.64'}}]
-                        
-                            
-                        # print("dict", type(data_nojson))
-                        # json_body = [(data_nojson),]
-                        # ifclient.write_points(json_body)
-                        # print("insertado en influx")
-                    # print(ser.readline().decode('utf-8'))
+                    if con:
+                    	print("conectando con mongodb")
+                    	collection = db.medicion
+                    	listamedicion = [(datadecode)]
+                    	for lista in listamedicion:
+                    	    collection.insert_one(lista)
+                    	print("insertando data en mongodb")
                 except Exception as e:
                     print(e)
                     time.sleep(1)
@@ -124,28 +119,14 @@ while 1:
                     	data_nojson = data.decode("utf-8")
                     	datadecode = json.loads(data.decode("utf-8"))
                     	datadecode['date_time'] = str(getTime())
-                    	
+                    	datadecode['send_cloud'] = False
                     	print("conectando con mongodb")
-                    	db = con.waterqualityiot
                     	collection = db.medicion
-                    	
                     	listamedicion = [(datadecode)]
                     	for lista in listamedicion:
                     	    collection.insert_one(lista)
                     	print("insertando data en mongodb")
-                    #data = ser.readline()
-                    # print(data)
-                    #datadecode = json.loads(data)
-                    #datadecode['date_time'] = str(getTime())
-                    #datadecode['send_cloud'] = False
-                    #print("guardar en influx db")
-                    # if ifclient:
-                    #     data = [{
-                    #         "measurement":"measurement",
-                    #         "data":datadecode}]
-                    #     ifclient.write_points(data)
-                    #     print("insertado en influx")
-                    # print(ser.readline().decode('utf-8'))
+                
                 except Exception as e:
                     print(e)
                     time.sleep(1)
