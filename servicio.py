@@ -11,6 +11,7 @@ from pubnub_config import pubnubClient
 from config import (API_URL, API_SELF_DEVICE_PASSWORD, API_SELF_DEVICE_USERNAME, API_LOGIN_URL, COM_PORT, API_SEND_DATA_URL)
 from request import post_data
 from influx_config import ifclient
+from mongo_config import con
 
 # pubnubconfig variables
 subscribe_key = None
@@ -118,12 +119,26 @@ while 1:
                     time.sleep(1)
             else:
                 try:
-                    data = ser.readline()
+                    if con:
+                    	data = ser.readline()
+                    	data_nojson = data.decode("utf-8")
+                    	datadecode = json.loads(data.decode("utf-8"))
+                    	datadecode['date_time'] = str(getTime())
+                    	
+                    	print("conectando con mongodb")
+                    	db = con.waterqualityiot
+                    	collection = db.medicion
+                    	
+                    	listamedicion = [(datadecode)]
+                    	for lista in listamedicion:
+                    	    collection.insert_one(lista)
+                    	print("insertando data en mongodb")
+                    #data = ser.readline()
                     # print(data)
-                    datadecode = json.loads(data)
-                    datadecode['date_time'] = str(getTime())
-                    datadecode['send_cloud'] = False
-                    print("guardar en influx db")
+                    #datadecode = json.loads(data)
+                    #datadecode['date_time'] = str(getTime())
+                    #datadecode['send_cloud'] = False
+                    #print("guardar en influx db")
                     # if ifclient:
                     #     data = [{
                     #         "measurement":"measurement",
