@@ -23,7 +23,6 @@ CHANNEL = None
 token = None
 
 pubnub = pubnubClient()
-
 db = con.waterqualityiot
 
 
@@ -99,12 +98,19 @@ while 1:
                     if subscribe_key is not None:
                         print("mandar a pubnub")
                         pubnub.pubnub_publish(datadecode)
+
                         
                     datadecode['send_cloud'] = True
                     
                     if con:
-                    	print("conectando con mongodb")
+                        print("Conectado a mongo")
                     	collection = db.medicion
+                        print("consultando si hay datos pendientes para enviar a la nube")
+                        querySendCloud = { "send_cloud": True }
+
+                    	data_send = collection.find(querySendCloud)
+                        print(data_send)
+
                     	listamedicion = [(datadecode)]
                     	for lista in listamedicion:
                     	    collection.insert_one(lista)
