@@ -28,7 +28,7 @@ db = con.waterqualityiot
 
 def login():
     global token, subscribe_key, publish_key, uuid, CHANNEL
-	data = post_data(API_LOGIN_URL,body={'username':API_SELF_DEVICE_USERNAME, 'password':API_SELF_DEVICE_PASSWORD})
+    data = post_data(API_LOGIN_URL,body={'username':API_SELF_DEVICE_USERNAME, 'password':API_SELF_DEVICE_PASSWORD})
     token = data['data']
     subscribe_key = data['infodevice']['suscribe_key_pubnub']
     publish_key = data['infodevice']['publish_key_pubnub']
@@ -112,19 +112,18 @@ while 1:
                         #print(data_send)
                         data_cloud = []
                         if data_send > 0:
-                        	print("si encontró elementos pendientes por enviar")
-                        	data_send = collection.find(querySendCloud)
-                        	for key in data_send:
-                        		data_cloud.append(key)
-							if token:
-								print("hola")
-                                        	
-                        else:
-                        	print("no hay elementos pendientes por enviar")
+                            print("si encontró elementos pendientes por enviar")
+                            data_send = collection.find(querySendCloud)
+                            for key in data_send:
+                                data_cloud.append(key)
+                            if token:
+                                print("hola")
+                            else:
+                                print("no hay elementos pendientes por enviar")
                         
                         listamedicion = [(datadecode)]
                         for lista in listamedicion:
-                        	collection.insert_one(lista)
+                            collection.insert_one(lista)
                         print("insertando data en mongodb") 
                 except Exception as e:
                     print(e)
