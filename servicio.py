@@ -28,7 +28,7 @@ db = con.waterqualityiot
 
 def login():
     global token, subscribe_key, publish_key, uuid, CHANNEL
-    data = post_data(API_LOGIN_URL,body={'username':API_SELF_DEVICE_USERNAME, 'password':API_SELF_DEVICE_PASSWORD})
+	data = post_data(API_LOGIN_URL,body={'username':API_SELF_DEVICE_USERNAME, 'password':API_SELF_DEVICE_PASSWORD})
     token = data['data']
     subscribe_key = data['infodevice']['suscribe_key_pubnub']
     publish_key = data['infodevice']['publish_key_pubnub']
@@ -101,11 +101,9 @@ while 1:
                         print("mandar a pubnub")
                         pubnub.pubnub_publish(datadecode)
 
-                        
-                    
-                    
+                                        
                     if con:
-                        print("Conectado a mongo")
+                    	print("Conectado a mongo")
                         collection = db.medicion
                         print("consultando si hay datos pendientes para enviar a la nube")
                         querySendCloud = { "send_cloud": False }
@@ -118,16 +116,9 @@ while 1:
                         	data_send = collection.find(querySendCloud)
                         	for key in data_send:
                         		data_cloud.append(key)
-                            
-                            if token:
-                                sendDataToApi({"data":data_cloud}})
-                                collection.update_many(querySendCloud,queryConfirmSendCloud)
-                                print("data pendiente enviada a la nube, resgitros locales actualizados")
-                            else:
-                                datadecode['send_cloud'] = False
-                                print("no se ha podido enviar a la nube no hay autenticacion")
-                        	print(data_cloud)
-                        	
+							if token:
+								print("hola")
+                                        	
                         else:
                         	print("no hay elementos pendientes por enviar")
                         
