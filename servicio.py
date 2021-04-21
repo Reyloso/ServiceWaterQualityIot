@@ -71,13 +71,14 @@ def conectSerialWithPort():
         return None
 
 ser = conectSerialWithPort()
-flat = True
+flat =True
 while 1:
     if ser:
         if ser.read():
            #if IsInternetUp():
             if flat:
                 try:
+                    print("con internet")
                     #se lee el puerto serial
                     data = ser.readline()
                     # print("antes de json ", data.decode("utf-8"))
@@ -86,8 +87,10 @@ while 1:
                     # datadecode = json.dumps(datadecode)
                     # print("data decodificada", datadecode)
                     datadecode['date_time'] = str(getTime())
+                    print(datadecode)
                     
                     # se verifica si esta autenticado
+                    print("verificar auth")
                     if token is None:
                         print("auntenticando dispositivo")
                         login()
@@ -96,16 +99,23 @@ while 1:
                         print("enviando data via api-rest")
                         sendDataToApi(datadecode)
                         datadecode['send_cloud'] = True
+                        listamedicion = [(datadecode)]
+                        for lista in listamedicion:
+                            collection.insert_one(lista)
+                        print("insertando data en mongodb")
                                     
                     if subscribe_key is not None:
                         print("mandar a pubnub")
-                        pubnub.pubnub_publish(datadecode)
+                        print(datadecode)
+                        value = datadecode
+                        if '_id' in value:
+                            del value['_id']
+                        pubnub.pubnub_publish(value)
 
                                         
                     if con:
-                    	print("Conectado a mongo")
+                        print("veificar si hay datos pendientes por enviar")
                         collection = db.medicion
-                        print("consultando si hay datos pendientes para enviar a la nube")
                         querySendCloud = { "send_cloud": False }
                         queryConfirmSendCloud ={ "$set": {"send_cloud":True }}
                         data_send = collection.count_documents(querySendCloud, limit = 1)
@@ -115,16 +125,19 @@ while 1:
                             print("si encontró elementos pendientes por enviar")
                             data_send = collection.find(querySendCloud)
                             for key in data_send:
-                                data_cloud.append(key)
+                                value = key
+                                if '_id' in value:
+                                    del value['_id']
+                                data_cloud.append(value)
                             if token:
-                                print("hola")
-                            else:
-                                print("no hay elementos pendientes por enviar")
+                                data = {"data":data_cloud}
+                                print(data)
+                                sendDataToApi(data)
+                                collection.update_many(querySendCloud, queryConfirmSendCloud)
+                                print("data enviada a la nube y actualizada en mongo")
+                        else:
+                            print("no hay elementos pendientes por enviar")
                         
-                        listamedicion = [(datadecode)]
-                        for lista in listamedicion:
-                            collection.insert_one(lista)
-                        print("insertando data en mongodb") 
                 except Exception as e:
                     print(e)
                     time.sleep(1)
